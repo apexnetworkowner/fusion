@@ -3,6 +3,7 @@
   "build": {
     "builder": "NIXPACKS"
   },
+  "start": "python3 selfbot.py",
   "deploy": {
     "runtime": "V2",
     "numReplicas": 1,
@@ -16,3 +17,4 @@
     "restartPolicyMaxRetries": 10
   }
 }
+
