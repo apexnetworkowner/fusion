@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Sites Full Embed Extractor</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 30px; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 14px; }
+    button { background: #0077ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #005fcc; }
+    pre { background: #eee; padding: 10px; border-radius: 5px; font-size: 13px; overflow-x: auto; max-height: 400px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Google Sites Full Embed Extractor</h2>
+    <p>Enter a Google Sites page URL:</p>
+    <input type="text" id="urlInput" placeholder="https://sites.google.com/view/...">
+    <button onclick="extractEmbeds()">Extract Full Embeds</button>
+    <h3>Extracted HTML:</h3>
+    <pre id="output"></pre>
+  </div>
+
+  <script>
+    async function fetchHTML(url) {
+      const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
+      const data = await res.json();
+      return data.contents;
+    }
+
+    async function extractEmbeds() {
+      const url = document.getElementById("urlInput").value.trim();
+      const output = document.getElementById("output");
+      output.textContent = "⏳ Fetching main page...";
+
+      try {
+        const mainHTML = await fetchHTML(url);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(mainHTML, "text/html");
+
+        let results = [];
+        let iframes = doc.querySelectorAll("iframe");
+
+        if (iframes.length === 0) {
+          output.textContent = "❌ No embeds found.";
+          return;
+        }
+
+        results.push("Found " + iframes.length + " iframes:\n");
+
+        for (let iframe of iframes) {
+          let src = iframe.src;
+          results.push("=== IFRAME SRC ===\n" + src);
+
+          try {
+            results.push("⏳ Fetching iframe...");
+            let iframeHTML = await fetchHTML(src);
+            results.push("---- IFRAME CONTENT ----\n" + iframeHTML);
+          } catch (err) {
+            results.push("⚠️ Could not fetch iframe: " + err.message);
+          }
+        }
+
+        output.textContent = results.join("\n\n");
+      } catch (err) {
+        output.textContent = "⚠️ Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
