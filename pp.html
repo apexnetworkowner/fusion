@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Data URL Generator</title>
+  <title>Data URL Snippet Manager</title>
+
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-css.min.js"></script>
+
   <style>
     body {
       font-family: "Segoe UI", Tahoma, sans-serif;
@@ -10,23 +18,15 @@
       padding: 40px;
     }
     .container {
-      max-width: 700px;
+      max-width: 800px;
       margin: auto;
       background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin: 15px 0 5px;
-    }
+    h2 { text-align: center; margin-bottom: 20px; color: #333; }
+    label { font-weight: 600; display: block; margin: 15px 0 5px; }
     input, textarea {
       width: 100%;
       padding: 12px;
@@ -49,51 +49,73 @@
       transition: 0.2s;
     }
     button:hover { background: #005fcc; }
-    .output {
-      margin-top: 25px;
-      padding: 15px;
-      background: #f9fafb;
-      border-radius: 10px;
+
+    /* Collapsible Snippets */
+    .snippet {
       border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 15px;
+      background: #fafafa;
+      overflow: hidden;
+      transition: all 0.3s ease;
     }
-    .output h3 {
-      margin-top: 0;
+    .snippet-header {
+      padding: 14px 18px;
+      font-weight: 600;
+      background: #f5f5f5;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
     }
-    .output input {
-      margin-bottom: 10px;
+    .snippet-header:hover { background: #e9e9e9; }
+    .arrow { transition: transform 0.3s; }
+    .snippet-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding: 0 18px; }
+    .snippet-content-inner { margin: 15px 0; }
+
+    .embed-box {
+      background: #1e1e1e;
+      color: #dcdcdc;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre;
+      position: relative;
     }
+
+    .snippet-actions { margin-top: 10px; }
+    .snippet-actions button {
+      width: auto;
+      padding: 8px 12px;
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    .delete-btn { background: #ff4d4d; }
+    .delete-btn:hover { background: #cc0000; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📦 Data URL Generator</h2>
+    <h2>📦 Data URL Snippet Manager</h2>
 
     <label for="titleInput">Title</label>
-    <input type="text" id="titleInput" placeholder="Enter a title (e.g. My Code Snippet)">
+    <input type="text" id="titleInput" placeholder="Enter a title (e.g. My Snippet)">
 
     <label for="inputText">Text / Code</label>
     <textarea id="inputText" placeholder="Paste code or text here..."></textarea>
 
-    <button onclick="generateLink()">Generate Data URL</button>
+    <button onclick="saveSnippet()">Save Snippet</button>
 
-    <div id="result" class="output" style="display:none;">
-      <h3>✅ Your Data URL</h3>
-      <input type="text" id="dataUrl" readonly>
-      <button onclick="copyLink()">📋 Copy Link</button>
-      <p><a id="openLink" href="#" target="_blank">🔗 Open Data URL</a></p>
-      <p><b>Embed in Google Sites:</b></p>
-      <pre id="embedCode" style="background:#eee; padding:8px; border-radius:6px; font-size:13px;"></pre>
-    </div>
+    <div id="snippetsList"></div>
   </div>
 
   <script>
-    function generateLink() {
-      let title = document.getElementById("titleInput").value.trim() || "Untitled";
-      let text = document.getElementById("inputText").value.trim();
-
-      if (!text) return alert("⚠️ Please enter some text or code.");
-
-      // Create the display HTML
+    function generateDataUrl(title, text) {
       let html = `
 <!DOCTYPE html>
 <html>
@@ -114,24 +136,89 @@
   <button onclick="navigator.clipboard.writeText(document.getElementById('content').innerText)">📋 Copy Text</button>
 </body>
 </html>`;
-
-      // Encode into data:text/html
-      let encoded = btoa(unescape(encodeURIComponent(html)));
-      let dataUrl = "data:text/html;base64," + encoded;
-
-      // Show results
-      document.getElementById("dataUrl").value = dataUrl;
-      document.getElementById("openLink").href = dataUrl;
-      document.getElementById("embedCode").textContent = `<iframe src="${dataUrl}" width="100%" height="400" style="border:none;"></iframe>`;
-      document.getElementById("result").style.display = "block";
+      return "data:text/html;base64," + btoa(unescape(encodeURIComponent(html)));
     }
 
-    function copyLink() {
-      let input = document.getElementById("dataUrl");
-      input.select();
-      document.execCommand("copy");
-      alert("✅ Link copied!");
+    function saveSnippet() {
+      let title = document.getElementById("titleInput").value.trim() || "Untitled";
+      let text = document.getElementById("inputText").value.trim();
+      if (!text) return alert("⚠️ Please enter some text or code.");
+
+      let dataUrl = generateDataUrl(title, text);
+      let snippets = JSON.parse(localStorage.getItem("snippets") || "[]");
+      snippets.push({ title, text, dataUrl });
+      localStorage.setItem("snippets", JSON.stringify(snippets));
+
+      document.getElementById("titleInput").value = "";
+      document.getElementById("inputText").value = "";
+      renderSnippets();
     }
+
+    function renderSnippets() {
+      let snippets = JSON.parse(localStorage.getItem("snippets") || "[]");
+      let container = document.getElementById("snippetsList");
+      container.innerHTML = "";
+
+      if (snippets.length === 0) {
+        container.innerHTML = "<p>No snippets saved yet.</p>";
+        return;
+      }
+
+      snippets.forEach((snip, i) => {
+        let embedCode = `<iframe src="${snip.dataUrl}" width="100%" height="400" style="border:none;"></iframe>`;
+
+        let div = document.createElement("div");
+        div.className = "snippet";
+
+        div.innerHTML = `
+          <div class="snippet-header" onclick="toggleSnippet(this)">
+            <span>${snip.title}</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="snippet-content">
+            <div class="snippet-content-inner">
+              <pre class="embed-box language-markup">${embedCode.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+              <div class="snippet-actions">
+                <button onclick="openSnippet('${snip.dataUrl}')">🔗 Open</button>
+                <button onclick="copyLink('${snip.dataUrl}')">📋 Copy Link</button>
+                <button onclick="copyEmbed(\`${embedCode}\`)">📋 Copy Embed</button>
+                <button class="delete-btn" onclick="deleteSnippet(${i})">🗑 Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+
+      // Re-highlight with Prism
+      Prism.highlightAll();
+    }
+
+    function toggleSnippet(header) {
+      let content = header.nextElementSibling;
+      let arrow = header.querySelector(".arrow");
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        arrow.style.transform = "rotate(0deg)";
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        arrow.style.transform = "rotate(180deg)";
+      }
+    }
+
+    function openSnippet(url) { window.open(url, "_blank"); }
+    function copyLink(url) { navigator.clipboard.writeText(url); alert("✅ Link copied!"); }
+    function copyEmbed(code) { navigator.clipboard.writeText(code); alert("✅ Embed code copied!"); }
+
+    function deleteSnippet(index) {
+      let snippets = JSON.parse(localStorage.getItem("snippets") || "[]");
+      snippets.splice(index, 1);
+      localStorage.setItem("snippets", JSON.stringify(snippets));
+      renderSnippets();
+    }
+
+    renderSnippets();
   </script>
 </body>
 </html>
