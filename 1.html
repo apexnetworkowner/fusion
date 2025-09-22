@@ -3,135 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Game Embed Generator</title>
+<title>Game → Data URL Embed Generator</title>
 <style>
   body { font-family: Arial, sans-serif; margin:20px; background:#f5f5f5; }
   h2 { color:#4a148c; }
   label { font-weight:bold; margin-top:12px; display:block; }
-  textarea, input { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc; font-family:monospace; }
+  textarea, input[type=file] { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc; font-family:monospace; }
   button { margin-top:12px; padding:10px 16px; border:none; border-radius:6px; background:#4a148c; color:white; cursor:pointer; }
   button:hover { background:#6a1b9a; }
   #status { margin-top:10px; font-weight:bold; }
 </style>
 </head>
 <body>
-<h2>Game Embed Generator</h2>
+<h2>HTML Game → Google Sites Embed Generator</h2>
 
-<label for="gameHTML">Paste HTML Game Code:</label>
-<textarea id="gameHTML" rows="10"></textarea>
+<label for="fileInput">Choose HTML Game File:</label>
+<input id="fileInput" type="file" accept=".html,.htm">
 
-<label for="password">Set Password:</label>
-<input id="password" type="password">
+<label for="gameHTML">Or Paste HTML Game Code:</label>
+<textarea id="gameHTML" rows="10" placeholder="Paste your game HTML here..."></textarea>
 
-<button id="generate">Generate Embed</button>
+<button id="convert">Convert to Embed</button>
 <div id="status"></div>
 
-<h3>Iframe Embed Snippet</h3>
+<h3>Iframe Embed (Google Sites)</h3>
 <textarea id="iframeSnippet" rows="6" readonly></textarea>
 <button id="copyBtn">Copy</button>
 
 <script>
-// Helper: Base64 encode
+let currentDataUrl = "";
+
+// Convert text to base64
 function toBase64(str){
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-// SHA-256 hash
-async function hashPassword(password){
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-async function generateEmbed(){
-  const html = document.getElementById("gameHTML").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  const status = document.getElementById("status");
-
-  if(!html || !pass){
-    status.textContent = "⚠️ Fill in both fields!";
-    return;
+// Handle file upload
+document.getElementById("fileInput").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      document.getElementById("gameHTML").value = ev.target.result;
+    };
+    reader.readAsText(file);
   }
-  status.textContent = "⏳ Generating...";
+});
 
-  const hashed = await hashPassword(pass);
-  const encodedGame = toBase64(html);
+// Convert game → data URL + iframe
+document.getElementById("convert").addEventListener("click", ()=>{
+  const html = document.getElementById("gameHTML").value.trim();
+  const status = document.getElementById("status");
+  if(!html){ status.textContent = "⚠️ Please upload or paste a game."; return; }
 
-  // The protected HTML (will be embedded as data URL)
-  const protectedHTML = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Protected Game</title>
-  <style>
-    body { margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background:#111; color:#fff; font-family:sans-serif; flex-direction:column; }
-    button { padding:12px 20px; border:none; border-radius:6px; background:#4a148c; color:white; font-size:16px; cursor:pointer; margin:6px; }
-    button:hover { background:#6a1b9a; }
-  </style>
-</head>
-<body>
-  <div id="screen">
-    <h2>Enter Password to Unlock Game</h2>
-    <button onclick="askPass()">Enter Password</button>
-  </div>
-<script>
-const hash = "${hashed}";
-const gameHTML = atob("${encodedGame}");
+  status.textContent = "⏳ Converting...";
+  try {
+    const encoded = toBase64(html);
+    currentDataUrl = "data:text/html;base64," + encoded;
 
-async function sha256(str){
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
-}
+    const snippet = `<iframe src="${currentDataUrl}" style="width:100%;height:600px;border:0;"></iframe>`;
+    document.getElementById("iframeSnippet").value = snippet;
+    status.textContent = "✅ Embed generated!";
+  } catch(err){
+    console.error(err);
+    status.textContent = "❌ Failed to generate.";
+  }
+});
 
-function askPass(){
-  const input = prompt("Enter password");
-  sha256(input).then(h => {
-    if(h === hash){
-      document.body.innerHTML = '<button onclick="launchGame()">Launch Game</button>' +
-                                '<button onclick="openFullscreen()">Fullscreen</button>' +
-                                '<div id="gameContainer" style="width:100%;height:100%;"></div>';
-    } else {
-      alert("Wrong password!");
-    }
-  });
-}
-
-function launchGame(){
-  const container = document.getElementById("gameContainer");
-  const frame = document.createElement("iframe");
-  frame.style = "border:0;width:100%;height:100%;";
-  container.innerHTML = "";
-  container.appendChild(frame);
-  frame.contentWindow.document.open();
-  frame.contentWindow.document.write(gameHTML);
-  frame.contentWindow.document.close();
-}
-
-function openFullscreen(){
-  const w = window.open("about:blank","_blank");
-  w.document.write(gameHTML);
-  w.document.close();
-}
-</script>
-</body>
-</html>`;
-
-  const dataUrl = "data:text/html;base64," + toBase64(protectedHTML);
-  const snippet = `<iframe src="${dataUrl}" style="width:100%;height:600px;border:0;"></iframe>`;
-
-  document.getElementById("iframeSnippet").value = snippet;
-  status.textContent = "✅ Embed generated!";
-}
-
-function copyEmbed(){
+// Copy button
+document.getElementById("copyBtn").addEventListener("click", ()=>{
   const txt = document.getElementById("iframeSnippet").value;
   if(txt){
     navigator.clipboard.writeText(txt).then(()=>alert("Copied!"));
   }
-}
+});
 
-document.getElementById("generate").addEventListener("click", generateEmbed);
-document.getElementById("copyBtn").addEventListener("click", copyEmbed);
+// Keyboard shortcut: Shift + C → open in new tab
+document.addEventListener("keydown", e=>{
+  if(e.shiftKey && e.key.toLowerCase() === "c" && currentDataUrl){
+    const w = window.open("about:blank","_blank");
+    w.document.write(`<iframe src="${currentDataUrl}" style="border:0;width:100%;height:100%;"></iframe>`);
+    w.document.close();
+  }
+});
 </script>
 </body>
 </html>
