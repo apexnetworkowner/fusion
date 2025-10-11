@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Google Sites Full Embed Extractor</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 30px; }
-    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
-    input, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 14px; }
-    button { background: #0077ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #005fcc; }
-    pre { background: #eee; padding: 10px; border-radius: 5px; font-size: 13px; overflow-x: auto; max-height: 400px; overflow-y: auto; }
-  </style>
+<meta charset="UTF-8">
+<title>Simple Weather App</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .weather-card {
+    background: rgba(255,255,255,.9);
+    border-radius: 12px;
+    padding: 20px 30px;
+    width: 320px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    text-align: center;
+  }
+  .weather-card h2 { margin: 0 0 10px; }
+  .weather-card input {
+    width: calc(100% - 22px);
+    padding: 8px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .weather-card button {
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .weather-card button:hover { background: #357ab8; }
+  .result { margin-top: 20px; }
+  .temp { font-size: 2.2rem; font-weight: bold; }
+  .desc { text-transform: capitalize; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Google Sites Full Embed Extractor</h2>
-    <p>Enter a Google Sites page URL:</p>
-    <input type="text" id="urlInput" placeholder="https://sites.google.com/view/...">
-    <button onclick="extractEmbeds()">Extract Full Embeds</button>
-    <h3>Extracted HTML:</h3>
-    <pre id="output"></pre>
-  </div>
 
-  <script>
-    async function fetchHTML(url) {
-      const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
-      const data = await res.json();
-      return data.contents;
-    }
+<div class="weather-card">
+  <h2>Weather App</h2>
+  <input type="text" id="cityInput" placeholder="Enter city name…" />
+  <button onclick="getWeather()">Get Weather</button>
 
-    async function extractEmbeds() {
-      const url = document.getElementById("urlInput").value.trim();
-      const output = document.getElementById("output");
-      output.textContent = "⏳ Fetching main page...";
+  <div class="result" id="result"></div>
+</div>
 
-      try {
-        const mainHTML = await fetchHTML(url);
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(mainHTML, "text/html");
+<script>
+// Replace with your own OpenWeatherMap API key (free tier works fine)
+const API_KEY = 'd0c53a3b04fd1cdae8f823d2de4657d1';
 
-        let results = [];
-        let iframes = doc.querySelectorAll("iframe");
+async function getWeather() {
+  const city = document.getElementById('cityInput').value.trim();
+  const resultDiv = document.getElementById('result');
+  if (!city) {
+    resultDiv.innerHTML = '<p>Please enter a city.</p>';
+    return;
+  }
 
-        if (iframes.length === 0) {
-          output.textContent = "❌ No embeds found.";
-          return;
-        }
+  resultDiv.innerHTML = '<p>Loading…</p>';
 
-        results.push("Found " + iframes.length + " iframes:\n");
+  try {
+    const resp = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
+    );
+    if (!resp.ok) throw new Error('City not found');
 
-        for (let iframe of iframes) {
-          let src = iframe.src;
-          results.push("=== IFRAME SRC ===\n" + src);
+    const data = await resp.json();
 
-          try {
-            results.push("⏳ Fetching iframe...");
-            let iframeHTML = await fetchHTML(src);
-            results.push("---- IFRAME CONTENT ----\n" + iframeHTML);
-          } catch (err) {
-            results.push("⚠️ Could not fetch iframe: " + err.message);
-          }
-        }
+    const html = `
+      <h3>${data.name}, ${data.sys.country}</h3>
+      <div class="temp">${Math.round(data.main.temp)}°C</div>
+      <div class="desc">${data.weather[0].description}</div>
+      <p>Humidity: ${data.main.humidity}% | Wind: ${Math.round(data.wind.speed)} m/s</p>
+    `;
+    resultDiv.innerHTML = html;
+  } catch (err) {
+    resultDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+  }
+}
+</script>
 
-        output.textContent = results.join("\n\n");
-      } catch (err) {
-        output.textContent = "⚠️ Error: " + err.message;
-      }
-    }
-  </script>
 </body>
 </html>
