@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TXT → NJK Converter</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #0d1117;
+        color: #fff;
+        text-align: center;
+        padding-top: 60px;
+    }
+    .box {
+        background: #161b22;
+        padding: 40px;
+        border-radius: 12px;
+        width: 400px;
+        margin: auto;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    input[type="file"] {
+        margin: 20px 0;
+    }
+    button {
+        padding: 10px 20px;
+        border: none;
+        background: #238636;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #2ea043;
+    }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>TXT → NJK Converter</h2>
+    <input type="file" id="fileInput" accept=".txt"><br>
+    <button onclick="convert()">Convert</button>
+    <p id="status"></p>
+</div>
+
+<script>
+function convert() {
+    const fileInput = document.getElementById("fileInput");
+    const status = document.getElementById("status");
+
+    if (!fileInput.files.length) {
+        status.textContent = "Please upload a .txt file first.";
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const text = e.target.result;
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const link = document.createElement("a");
+
+        let name = file.name.replace(".txt", "") + ".njk";
+
+        link.href = URL.createObjectURL(blob);
+        link.download = name;
+        link.click();
+
+        status.textContent = "File converted and downloaded!";
+    };
+
+    reader.readAsText(file);
+}
+</script>
+
+</body>
+</html>
