@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Apex Style Particles</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+    }
+
+    #canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(255, 87, 34, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 229, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 23, 68, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #0a0a0f 0%, #0d1117 50%, #0a0a0f 100%);
+    }
+
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background-image: 
+        linear-gradient(rgba(255, 87, 34, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 87, 34, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+      100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .logo {
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ff5722 0%, #ff1744 50%, #00e5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 60px rgba(255, 87, 34, 0.5);
+      margin-bottom: 1rem;
+      animation: logoGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes logoGlow {
+      0% { filter: drop-shadow(0 0 20px rgba(255, 87, 34, 0.8)); }
+      100% { filter: drop-shadow(0 0 40px rgba(0, 229, 255, 0.8)); }
+    }
+
+    .tagline {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .stats {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat {
+      padding: 1rem 2rem;
+      background: rgba(255, 87, 34, 0.1);
+      border: 1px solid rgba(255, 87, 34, 0.3);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .stat:hover {
+      background: rgba(255, 87, 34, 0.2);
+      border-color: #ff5722;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(255, 87, 34, 0.3);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff5722;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .energy-lines {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .energy-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff5722, #00e5ff, transparent);
+      animation: energyFlow 3s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes energyFlow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100vw); }
+    }
+
+    .corner-accent {
+      position: fixed;
+      width: 150px;
+      height: 150px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .corner-accent.top-left {
+      top: 20px;
+      left: 20px;
+      border-top: 2px solid rgba(255, 87, 34, 0.5);
+      border-left: 2px solid rgba(255, 87, 34, 0.5);
+    }
+
+    .corner-accent.top-right {
+      top: 20px;
+      right: 20px;
+      border-top: 2px solid rgba(0, 229, 255, 0.5);
+      border-right: 2px solid rgba(0, 229, 255, 0.5);
+    }
+
+    .corner-accent.bottom-left {
+      bottom: 20px;
+      left: 20px;
+      border-bottom: 2px solid rgba(0, 229, 255, 0.5);
+      border-left: 2px solid rgba(0, 229, 255, 0.5);
+    }
+
+    .corner-accent.bottom-right {
+      bottom: 20px;
+      right: 20px;
+      border-bottom: 2px solid rgba(255, 87, 34, 0.5);
+      border-right: 2px solid rgba(255, 87, 34, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .stats {
+        gap: 1rem;
+      }
+      .stat {
+        padding: 0.75rem 1.25rem;
+      }
+      .stat-value {
+        font-size: 1.5rem;
+      }
+      .corner-accent {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="grid-overlay"></div>
+  
+  <canvas id="canvas"></canvas>
+  
+  <div class="corner-accent top-left"></div>
+  <div class="corner-accent top-right"></div>
+  <div class="corner-accent bottom-left"></div>
+  <div class="corner-accent bottom-right"></div>
+  
+  <div class="energy-lines">
+    <div class="energy-line" style="top: 20%; width: 30%; animation-delay: 0s;"></div>
+    <div class="energy-line" style="top: 40%; width: 50%; animation-delay: 0.5s;"></div>
+    <div class="energy-line" style="top: 60%; width: 40%; animation-delay: 1s;"></div>
+    <div class="energy-line" style="top: 80%; width: 60%; animation-delay: 1.5s;"></div>
+  </div>
+  
+  <div class="content">
+    <h1 class="logo">APEX PARTICLES</h1>
+    <p class="tagline">Become a Legend</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="particleCount">0</div>
+        <div class="stat-label">Active Particles</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">60</div>
+        <div class="stat-label">FPS Target</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">Energy</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const particleCountEl = document.getElementById('particleCount');
+    
+    let width, height;
+    let particles = [];
+    let energyWaves = [];
+    let mouse = { x: null, y: null, radius: 150 };
+    
+    // Apex-style color palette
+    const colors = [
+      { r: 255, g: 87, b: 34 },   // Orange
+      { r: 255, g: 23, b: 68 },   // Red
+      { r: 0, g: 229, b: 255 },   // Cyan
+      { r: 255, g: 171, b: 0 },   // Amber
+      { r: 255, g: 255, b: 255 }, // White
+    ];
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor(x, y, isExplosion = false) {
+        this.x = x || Math.random() * width;
+        this.y = y || Math.random() * height;
+        this.size = Math.random() * 3 + 1;
+        this.baseSize = this.size;
+        
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        this.color = colors[colorIndex];
+        
+        if (isExplosion) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 8 + 4;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.life = 1;
+          this.decay = Math.random() * 0.02 + 0.01;
+          this.isExplosion = true;
+        } else {
+          this.vx = (Math.random() - 0.5) * 2;
+          this.vy = (Math.random() - 0.5) * 2 - 1;
+          this.life = 1;
+          this.decay = 0;
+          this.isExplosion = false;
+        }
+        
+        this.trail = [];
+        this.maxTrail = isExplosion ? 15 : 8;
+        this.glowIntensity = Math.random() * 0.5 + 0.5;
+        this.pulseSpeed = Math.random() * 0.05 + 0.02;
+        this.pulsePhase = Math.random() * Math.PI * 2;
+      }
+
+      update() {
+        // Store trail
+        this.trail.push({ x: this.x, y: this.y, size: this.size });
+        if (this.trail.length > this.maxTrail) {
+          this.trail.shift();
+        }
+
+        // Mouse interaction
+        if (mouse.x && mouse.y) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < mouse.radius) {
+            const force = (mouse.radius - dist) / mouse.radius;
+            const angle = Math.atan2(dy, dx);
+            this.vx -= Math.cos(angle) * force * 0.5;
+            this.vy -= Math.sin(angle) * force * 0.5;
+          }
+        }
+
+        // Apply velocity
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Friction
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+
+        // Pulse effect
+        this.pulsePhase += this.pulseSpeed;
+        this.size = this.baseSize + Math.sin(this.pulsePhase) * 0.5;
+
+        // Explosion particles decay
+        if (this.isExplosion) {
+          this.life -= this.decay;
+          this.vy += 0.1; // gravity
+        }
+
+        // Wrap around screen
+        if (!this.isExplosion) {
+          if (this.x < 0) this.x = width;
+          if (this.x > width) this.x = 0;
+          if (this.y < 0) this.y = height;
+          if (this.y > height) this.y = 0;
+        }
+
+        return this.life > 0;
+      }
+
+      draw() {
+        // Draw trail
+        for (let i = 0; i < this.trail.length; i++) {
+          const t = this.trail[i];
+          const alpha = (i / this.trail.length) * 0.3 * this.life;
+          const trailSize = (i / this.trail.length) * this.size;
+          
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, trailSize, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${alpha})`;
+          ctx.fill();
+        }
+
+        // Draw glow
+        const gradient = ctx.createRadialGradient(
+          this.x, this.y, 0,
+          this.x, this.y, this.size * 4
+        );
+        gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${0.8 * this.life * this.glowIntensity})`);
+        gradient.addColorStop(0.5, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${0.2 * this.life})`);
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Draw core
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.life})`;
+        ctx.fill();
+
+        // Draw bright center
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * this.life})`;
+        ctx.fill();
+      }
+    }
+
+    class EnergyWave {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.maxRadius = 200;
+        this.life = 1;
+        this.color = colors[Math.floor(Math.random() * 3)];
+      }
+
+      update() {
+        this.radius += 8;
+        this.life = 1 - (this.radius / this.maxRadius);
+        return this.life > 0;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.life * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    function createExplosion(x, y, count = 30) {
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(x, y, true));
+      }
+      energyWaves.push(new EnergyWave(x, y));
+    }
+
+    function init() {
+      resize();
+      particles = [];
+      
+      // Create initial particles
+      const particleCount = Math.min(150, Math.floor((width * height) / 10000));
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function drawConnections() {
+      const maxDist = 120;
+      
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < maxDist) {
+            const alpha = (1 - dist / maxDist) * 0.2 * particles[i].life * particles[j].life;
+            
+            const gradient = ctx.createLinearGradient(
+              particles[i].x, particles[i].y,
+              particles[j].x, particles[j].y
+            );
+            gradient.addColorStop(0, `rgba(${particles[i].color.r}, ${particles[i].color.g}, ${particles[i].color.b}, ${alpha})`);
+            gradient.addColorStop(1, `rgba(${particles[j].color.r}, ${particles[j].color.g}, ${particles[j].color.b}, ${alpha})`);
+            
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Update and draw energy waves
+      energyWaves = energyWaves.filter(wave => {
+        wave.draw();
+        return wave.update();
+      });
+
+      // Draw connections first
+      drawConnections();
+
+      // Update and draw particles
+      particles = particles.filter(particle => {
+        particle.draw();
+        return particle.update();
+      });
+
+      // Keep particle count stable for non-explosion particles
+      const baseParticles = particles.filter(p => !p.isExplosion);
+      const targetCount = Math.min(150, Math.floor((width * height) / 10000));
+      
+      if (baseParticles.length < targetCount) {
+        particles.push(new Particle());
+      }
+
+      // Update particle count display
+      particleCountEl.textContent = particles.length;
+
+      requestAnimationFrame(animate);
+    }
+
+    // Event listeners
+    window.addEventListener('resize', () => {
+      resize();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    canvas.addEventListener('click', (e) => {
+      createExplosion(e.clientX, e.clientY);
+    });
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      mouse.x = touch.clientX;
+      mouse.y = touch.clientY;
+      createExplosion(touch.clientX, touch.clientY);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      mouse.x = touch.clientX;
+      mouse.y = touch.clientY;
+    });
+
+    canvas.addEventListener('touchend', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    // Random explosions
+    setInterval(() => {
+      if (Math.random() > 0.7) {
+        createExplosion(
+          Math.random() * width,
+          Math.random() * height,
+          15
+        );
+      }
+    }, 2000);
+
+    // Start
+    init();
+    animate();
+  </script>
+</body>
+</html>
