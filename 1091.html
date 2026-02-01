@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Unscrambler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      background: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    #output {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔤 Full Word Unscrambler</h2>
+
+<input id="scramble" placeholder="Enter scrambled word" />
+<br>
+<button onclick="unscramble()">Unscramble</button>
+
+<div id="output">Loading word list...</div>
+
+<script>
+let dictionary = [];
+
+// Load full English word list
+fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt")
+  .then(res => res.text())
+  .then(text => {
+    dictionary = text.split("\n").map(w => w.trim());
+    document.getElementById("output").textContent =
+      "Word list loaded. Ready.";
+  })
+  .catch(() => {
+    document.getElementById("output").textContent =
+      "Failed to load word list.";
+  });
+
+function unscramble() {
+  const scramble = document.getElementById("scramble").value.toLowerCase();
+  if (!scramble) return;
+
+  const results = dictionary.filter(word => {
+    if (word.length !== scramble.length) return false;
+    let letters = scramble.split("");
+    for (let c of word) {
+      let i = letters.indexOf(c);
+      if (i === -1) return false;
+      letters.splice(i, 1);
+    }
+    return true;
+  });
+
+  document.getElementById("output").textContent =
+    results.length
+      ? "Matches:\n" + results.join(", ")
+      : "No matches found.";
+}
+</script>
+
+</body>
+</html>
