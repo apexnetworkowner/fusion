@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<!-- saved from url=(0027)https://html.cafe/x7f9fa902 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoGuesser AI - Advanced Multi-Pass Analysis</title>
+  <style>
+    :root {
+      --primary: #007cba;
+      --primary-dark: #005a87;
+      --secondary: #e94d6f;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --success: #28a745;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --gray: #6c757d;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    header {
+      text-align: center;
+      padding: 20px 0;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      color: var(--dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    h1 i {
+      color: var(--primary);
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card-header {
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 18px 25px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-body {
+      padding: 25px;
+    }
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+    .upload-area {
+      width: 100%;
+      max-width: 600px;
+      border: 2px dashed var(--primary);
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .upload-area:hover {
+      background: #eef5ff;
+      border-color: var(--primary-dark);
+    }
+    .upload-area i {
+      font-size: 3.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    .upload-area h3 {
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+    .upload-area p {
+      color: var(--gray);
+      margin-bottom: 15px;
+    }
+    .btn {
+      padding: 14px 28px;
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 124, 186, 0.25);
+    }
+    .btn:hover {
+      background: linear-gradient(to right, var(--primary-dark), #004466);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 124, 186, 0.35);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .image-preview {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+      margin-top: 15px;
+    }
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+    }
+    .analysis-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    .analysis-header {
+      background: #f1f5f9;
+      padding: 12px 15px;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .analysis-header.top { background: rgba(59, 130, 246, 0.1); }
+    .analysis-header.mid { background: rgba(16, 185, 129, 0.1); }
+    .analysis-header.bot { background: rgba(234, 179, 8, 0.1); }
+    .analysis-header.full { background: rgba(139, 92, 246, 0.1); }
+    .analysis-header.unified { background: linear-gradient(to right, #10b981, #065f46); color: white; }
+    .analysis-body {
+      padding: 15px;
+    }
+    .analysis-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .coords {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+      font-family: monospace;
+      flex-wrap: wrap;
+    }
+    .lat { color: #1e40af; font-weight: 600; }
+    .lng { color: #c2410c; font-weight: 600; }
+    .reason {
+      background: #f8fafc;
+      border-left: 3px solid var(--primary);
+      padding: 10px 12px;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .consensus-section {
+      background: linear-gradient(to right, #f0fdf4, #dcfce7);
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 25px;
+    }
+    .consensus-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .consensus-header h2 {
+      color: #065f46;
+      font-size: 1.6rem;
+    }
+    .consensus-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .metric-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .metric-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #065f46;
+      margin: 10px 0;
+    }
+    .metric-label {
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+    .map-container {
+      height: 400px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 25px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .map-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .btn-secondary {
+      background: linear-gradient(to right, #64748b, #475569);
+    }
+    .btn-success {
+      background: linear-gradient(to right, #10b981, #059669);
+    }
+    .status-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+    .status-progress {
+      height: 100%;
+      background: linear-gradient(to right, var(--primary), var(--success));
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .status-text {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray);
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 0;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(0, 124, 186, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 30px 0 40px;
+    }
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #cbd5e1;
+      z-index: 1;
+    }
+    .step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 18%;
+    }
+    .step-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: var(--gray);
+      border: 2px solid #cbd5e1;
+    }
+    .step.active .step-number {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .step.completed .step-number {
+      background: var(--success);
+      color: white;
+      border-color: var(--success);
+    }
+    .step-label {
+      font-size: 0.85rem;
+      color: var(--gray);
+      text-align: center;
+    }
+    .step.active .step-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .step.completed .step-label {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .explanation {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 15px;
+      border-left: 3px solid var(--primary);
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
+    .highlight {
+      background: linear-gradient(120deg, rgba(139, 92, 246, 0.15), transparent);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    footer {
+      text-align: center;
+      padding: 25px 0;
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+    @media (max-width: 768px) {
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+      .consensus-metrics {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+      .coords {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="./GeoGuesser AI - Advanced Multi-Pass Analysis_files/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-globe-americas"></i> GeoGuesser AI</h1>
+      <p class="subtitle">Advanced location detection using multi-pass AI analysis - Full image, segmented analysis, and unified consensus for maximum accuracy</p>
+    </header>
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-upload"></i> Upload Image for Analysis
+      </div>
+      <div class="card-body">
+        <div class="input-section">
+          <div class="upload-area" id="dropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Drag &amp; Drop Image Here</h3>
+            <p>or click to browse files</p>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <button class="btn" id="browseBtn"><i class="fas fa-folder-open"></i> Browse Files</button>
+          </div>
+          <img src="https://html.cafe/x7f9fa902" id="imagePreview" class="image-preview" alt="Preview" style="display: none;">
+          <button class="btn" id="analyzeBtn" disabled="" style="background: linear-gradient(to right, var(--primary), var(--primary-dark));"><i class="fas fa-microchip"></i> Analyze with GPT-5 Nano AI</button>
+          <div class="status-bar" id="statusBar" style="display: none;">
+            <div class="status-progress" id="statusProgress"></div>
+          </div>
+          <div class="status-text" id="statusText" style="display: none;">
+            <span>Starting analysis...</span>
+            <span>0/5 passes completed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="resultsContainer" style="display: none;">
+      <div class="step-indicator">
+        <div class="step active">
+          <div class="step-number">1</div>
+          <div class="step-label">Full Image</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-label">Top Third</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-label">Middle Third</div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-label">Bottom Third</div>
+        </div>
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-label">Unified Result</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-brain"></i> Multi-Pass Analysis Results
+        </div>
+        <div class="card-body">
+          <div class="analysis-grid" id="analysisGrid"></div>
+          <div class="consensus-section">
+            <div class="consensus-header">
+              <i class="fas fa-star"></i>
+              <h2>Consensus Location Result</h2>
+            </div>
+            <div class="coords">
+              <span class="lat"><strong>Latitude:</strong> <span id="consensusLat">-</span></span>
+              <span class="lng"><strong>Longitude:</strong> <span id="consensusLng">-</span></span>
+            </div>
+            <div class="reason" id="consensusReason">The unified analysis synthesizes evidence from all image sections to determine the most probable location.</div>
+            <div class="consensus-metrics">
+              <div class="metric-card">
+                <div>Confidence</div>
+                <div class="metric-value" id="confidence">-</div>
+                <div class="metric-label">Based on consistency across analyses</div>
+              </div>
+              <div class="metric-card">
+                <div>Precision</div>
+                <div class="metric-value" id="precision">-</div>
+                <div class="metric-label">Estimated location accuracy</div>
+              </div>
+              <div class="metric-card">
+                <div>Consistency</div>
+                <div class="metric-value" id="consistency">-</div>
+                <div class="metric-label">Agreement across analyses</div>
+              </div>
+            </div>
+            <div class="map-container">
+              <iframe class="map-iframe" id="consensusMap" src="./GeoGuesser AI - Advanced Multi-Pass Analysis_files/saved_resource.html" allowfullscreen=""></iframe>
+            </div>
+            <div class="action-buttons">
+              <button class="btn btn-secondary" id="newAnalysisBtn">
+                <i class="fas fa-redo"></i> New Analysis
+              </button>
+              <button class="btn btn-success" id="streetViewBtn" disabled="">
+                <i class="fab fa-google"></i> View in Street View
+              </button>
+              <button class="btn" id="osmBtn" disabled="">
+                <i class="fab fa-openstreetmap"></i> OpenStreetMap
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <p>GeoGuesser AI v2.0 • Uses GPT-5 Nano via Pollinations.ai for superior location accuracy • 
+      <span class="highlight">Full image + 3 segments + unified consensus</span></p>
+    </footer>
+  </div>
+  <script>
+    // Global variables
+    let currentImage = null;
+    let analysisResults = [];
+    let currentStep = 0;
+    const TOTAL_STEPS = 5;
+    // DOM Elements
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const dropZone = document.getElementById('dropZone');
+    const browseBtn = document.getElementById('browseBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const statusBar = document.getElementById('statusBar');
+    const statusProgress = document.getElementById('statusProgress');
+    const statusText = document.getElementById('statusText');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const analysisGrid = document.getElementById('analysisGrid');
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    const streetViewBtn = document.getElementById('streetViewBtn');
+    const osmBtn = document.getElementById('osmBtn');
+    const consensusMap = document.getElementById('consensusMap');
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      resetUI();
+    });
+    function setupEventListeners() {
+      // Browse button
+      browseBtn.addEventListener('click', () => {
+        imageInput.click();
+      });
+      // File input change
+      imageInput.addEventListener('change', handleImageUpload);
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#005a87';
+        dropZone.style.backgroundColor = '#eef5ff';
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#007cba';
+        dropZone.style.backgroundColor = '#f8fafc';
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#007cba';
+        dropZone.style.backgroundColor = '#f8fafc';
+        if (e.dataTransfer.files.length) {
+          imageInput.files = e.dataTransfer.files;
+          handleImageUpload();
+        }
+      });
+      dropZone.addEventListener('click', () => {
+        imageInput.click();
+      });
+      // Analyze button
+      analyzeBtn.addEventListener('click', startAnalysis);
+      // New analysis button
+      newAnalysisBtn.addEventListener('click', resetUI);
+      // Street View button
+      streetViewBtn.addEventListener('click', () => {
+        if (analysisResults.length > 0) {
+          const { lat, lng } = analysisResults[analysisResults.length - 1];
+          window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`, '_blank');
+        }
+      });
+      // OSM button
+      osmBtn.addEventListener('click', () => {
+        if (analysisResults.length > 0) {
+          const { lat, lng } = analysisResults[analysisResults.length - 1];
+          window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`, '_blank');
+        }
+      });
+    }
+    function resetUI() {
+      // Reset image
+      imageInput.value = '';
+      imagePreview.src = '';
+      imagePreview.style.display = 'none';
+      currentImage = null;
+      // Reset buttons
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<i class="fas fa-microchip"></i> Analyze with GPT-5 Nano AI';
+      analyzeBtn.style.background = 'linear-gradient(to right, var(--primary), var(--primary-dark))';
+      // Hide results
+      resultsContainer.style.display = 'none';
+      statusBar.style.display = 'none';
+      statusText.style.display = 'none';
+      // Reset analysis grid
+      analysisGrid.innerHTML = '';
+      // Reset step indicators
+      document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active', 'completed');
+      });
+      document.querySelector('.step').classList.add('active');
+      // Reset current step
+      currentStep = 0;
+      analysisResults = [];
+      // Reset map
+      consensusMap.src = '';
+      // Reset metric displays
+      document.getElementById('consensusLat').textContent = '-';
+      document.getElementById('consensusLng').textContent = '-';
+      document.getElementById('consensusReason').textContent = 'The unified analysis synthesizes evidence from all image sections to determine the most probable location.';
+      document.getElementById('confidence').textContent = '-';
+      document.getElementById('precision').textContent = '-';
+      document.getElementById('consistency').textContent = '-';
+      // Reset button states
+      streetViewBtn.disabled = true;
+      osmBtn.disabled = true;
+    }
+    function handleImageUpload() {
+      const file = imageInput.files[0];
+      if (!file) return;
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showError('Please select a valid image file.');
+        return;
+      }
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        showError('Image file is too large. Please select an image under 10MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentImage = e.target.result;
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+        analyzeBtn.disabled = false;
+      };
+      reader.onerror = function() {
+        showError('Failed to read image file. Please try again.');
+      };
+      reader.readAsDataURL(file);
+    }
+    function showError(message) {
+      // Remove existing error messages
+      const existingErrors = document.querySelectorAll('.error-message');
+      existingErrors.forEach(error => error.remove());
+      // Create new error message
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+      // Insert after upload area
+      const uploadArea = document.getElementById('dropZone');
+      uploadArea.parentNode.insertBefore(errorDiv, uploadArea.nextSibling);
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.remove();
+        }
+      }, 5000);
+    }
+    function startAnalysis() {
+      if (!currentImage) {
+        showError('Please upload an image first!');
+        return;
+      }
+      // Remove any existing error messages
+      const existingErrors = document.querySelectorAll('.error-message');
+      existingErrors.forEach(error => error.remove());
+      // Reset previous results
+      analysisResults = [];
+      analysisGrid.innerHTML = '';
+      // Show status bar
+      statusBar.style.display = 'block';
+      statusText.style.display = 'block';
+      statusProgress.style.width = '0%';
+      document.getElementById('statusText').innerHTML = `
+        <span>Starting multi-pass analysis...</span>
+        <span>0/${TOTAL_STEPS} passes completed</span>
+      `;
+      // Update step indicators
+      document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active', 'completed');
+      });
+      document.querySelector('.step').classList.add('active');
+      // Show results container
+      resultsContainer.style.display = 'block';
+      // Disable analyze button during analysis
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+      // Start the analysis process
+      runMultiPassAnalysis();
+    }
+    function updateStatus(step, message) {
+      currentStep = step;
+      const progress = (step / TOTAL_STEPS) * 100;
+      statusProgress.style.width = `${progress}%`;
+      document.getElementById('statusText').innerHTML = `
+        <span>${message}</span>
+        <span>${step}/${TOTAL_STEPS} passes completed</span>
+      `;
+      // Update step indicators
+      document.querySelectorAll('.step').forEach((stepEl, i) => {
+        stepEl.classList.remove('active', 'completed');
+        if (i < step) {
+          stepEl.classList.add('completed');
+        } else if (i === step) {
+          stepEl.classList.add('active');
+        }
+      });
+    }
+    async function runMultiPassAnalysis() {
+      try {
+        // 1. Full image analysis
+        await runAnalysisPass('Full Image', currentImage, 'full');
+        // 2. Top third analysis
+        const topImage = await splitImage(currentImage, 'top');
+        await runAnalysisPass('Top Third', topImage, 'top');
+        // 3. Middle third analysis
+        const midImage = await splitImage(currentImage, 'mid');
+        await runAnalysisPass('Middle Third', midImage, 'mid');
+        // 4. Bottom third analysis
+        const botImage = await splitImage(currentImage, 'bot');
+        await runAnalysisPass('Bottom Third', botImage, 'bot');
+        // 5. Unified analysis
+        await runUnifiedAnalysis();
+        // Finalize
+        finalizeResults();
+      } catch (error) {
+        console.error("Analysis failed:", error);
+        showError(`Analysis failed: ${error.message}`);
+        // Reset UI to allow retry
+        analyzeBtn.innerHTML = '<i class="fas fa-microchip"></i> Analyze with GPT-5 Nano AI';
+        analyzeBtn.disabled = false;
+        statusBar.style.display = 'none';
+        statusText.style.display = 'none';
+      }
+    }
+    async function runAnalysisPass(title, image, type) {
+      updateStatus(currentStep + 1, `Analyzing ${title} with GPT-5 nano...`);
+      try {
+        // Image is already in base64 format from our processing
+        const base64Image = image;
+        // Call AI API
+        const result = await callAI(base64Image);
+        // Store result
+        analysisResults.push(result);
+        // Add to UI
+        addAnalysisCard(title, image, result, type);
+        return result;
+      } catch (error) {
+        console.error(`Failed ${title} analysis:`, error);
+        throw new Error(`AI analysis failed for ${title}: ${error.message}`);
+      }
+    }
+    async function runUnifiedAnalysis() {
+      updateStatus(5, 'Generating unified consensus result with GPT-5 nano...');
+      try {
+        // Create a summary of all previous results for the unified analysis
+        const summary = analysisResults.map((result, i) => 
+          `Analysis ${i+1} (Type: ${['Full','Top','Middle','Bottom'][i]}):
+` +
+          `Latitude: ${result.lat}
+` +
+          `Longitude: ${result.lng}
+` +
+          `Reason: ${result.reason}
+`
+        ).join('\n');
+        // Call AI for unified analysis with all previous results
+        const unifiedResult = await callUnifiedAI(summary);
+        // Store result
+        analysisResults.push(unifiedResult);
+        // Add to UI
+        addAnalysisCard('Unified Result', currentImage, unifiedResult, 'unified');
+        return unifiedResult;
+      } catch (error) {
+        console.error("Unified analysis failed:", error);
+        throw new Error(`Unified analysis failed: ${error.message}`);
+      }
+    }
+    // Real AI analysis using Pollinations API with GPT-5 nano
+    async function callAI(base64Image) {
+      try {
+        const response = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "gpt-5-nano",
+            reasoning_effort: "high",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Analyze this image and guess the geographic location. Respond in exactly this format:\nLatitude: [lat]\nLongitude: [lng]\nReason: [short explanation of why you think it's there, based on terrain, architecture, language, signs, vegetation, etc.]"
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: base64Image
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 500
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const aiResponse = data.choices?.[0]?.message?.content;
+        if (!aiResponse) {
+          throw new Error("No response from AI");
+        }
+        // Parse response
+        const latMatch = aiResponse.match(/Latitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const lngMatch = aiResponse.match(/Longitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const reasonMatch = aiResponse.match(/Reason:(.*)/s);
+        const lat = latMatch ? parseFloat(latMatch[1]) : null;
+        const lng = lngMatch ? parseFloat(lngMatch[1]) : null;
+        const reason = reasonMatch ? reasonMatch[1].trim() : "No explanation provided.";
+        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+          throw new Error("Could not extract valid coordinates from AI response");
+        }
+        // Validate coordinate ranges
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          throw new Error("Invalid coordinate values from AI response");
+        }
+        return { lat, lng, reason };
+      } catch (error) {
+        console.error("AI call failed:", error);
+        throw error;
+      }
+    }
+    async function callUnifiedAI(summary) {
+      try {
+        const response = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "gpt-5-nano",
+            reasoning_effort: "high",
+            messages: [
+              {
+                role: "user",
+                content: `Based on the following analyses of different parts of the same image, determine the most likely geographic location. Consider the consistency and evidence from each analysis.
+${summary}
+Respond in exactly this format:
+Latitude: [lat]
+Longitude: [lng]
+Reason: [explanation of how you reconciled the different analyses to reach this conclusion]`
+              }
+            ],
+            max_tokens: 500
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const aiResponse = data.choices?.[0]?.message?.content;
+        if (!aiResponse) {
+          throw new Error("No response from AI");
+        }
+        // Parse response
+        const latMatch = aiResponse.match(/Latitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const lngMatch = aiResponse.match(/Longitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const reasonMatch = aiResponse.match(/Reason:(.*)/s);
+        const lat = latMatch ? parseFloat(latMatch[1]) : null;
+        const lng = lngMatch ? parseFloat(lngMatch[1]) : null;
+        const reason = reasonMatch ? reasonMatch[1].trim() : "No explanation provided.";
+        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+          throw new Error("Could not extract valid coordinates from unified AI response");
+        }
+        // Validate coordinate ranges
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          throw new Error("Invalid coordinate values from unified AI response");
+        }
+        return { lat, lng, reason };
+      } catch (error) {
+        console.error("Unified AI call failed:", error);
+        // Fallback to averaging the previous results if unified analysis fails
+        const nonUnifiedResults = analysisResults;
+        if (nonUnifiedResults.length === 0) {
+          throw new Error("No previous results to fall back on");
+        }
+        const avgLat = nonUnifiedResults.reduce((sum, r) => sum + r.lat, 0) / nonUnifiedResults.length;
+        const avgLng = nonUnifiedResults.reduce((sum, r) => sum + r.lng, 0) / nonUnifiedResults.length;
+        return {
+          lat: avgLat,
+          lng: avgLng,
+          reason: "Unified analysis failed, using average of previous results. The location is determined by combining evidence from all image sections."
+        };
+      }
+    }
+    function addAnalysisCard(title, image, result, type) {
+      const card = document.createElement('div');
+      card.className = 'analysis-card';
+      // Determine header class and icon
+      let headerClass = '';
+      let icon = 'fa-globe';
+      switch(type) {
+        case 'top':
+          headerClass = 'top';
+          icon = 'fa-arrow-up';
+          break;
+        case 'mid':
+          headerClass = 'mid';
+          icon = 'fa-arrows-alt-h';
+          break;
+        case 'bot':
+          headerClass = 'bot';
+          icon = 'fa-arrow-down';
+          break;
+        case 'full':
+          headerClass = 'full';
+          icon = 'fa-globe';
+          break;
+        case 'unified':
+          headerClass = 'unified';
+          icon = 'fa-star';
+          break;
+      }
+      card.innerHTML = `
+        <div class="analysis-header ${headerClass}">
+          <i class="fas ${icon}"></i>
+          ${title}
+        </div>
+        <div class="analysis-body">
+          <img src="${image}" class="analysis-img" alt="${title}" loading="lazy">
+          <div class="coords">
+            <span class="lat"><strong>Latitude:</strong> ${result.lat.toFixed(4)}</span>
+            <span class="lng"><strong>Longitude:</strong> ${result.lng.toFixed(4)}</span>
+          </div>
+          <div class="reason">
+            ${result.reason}
+          </div>
+        </div>
+      `;
+      analysisGrid.appendChild(card);
+      // Smooth scroll to new card
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+    function finalizeResults() {
+      // Get the unified result (last one)
+      const unifiedResult = analysisResults[analysisResults.length - 1];
+      // Update consensus display
+      document.getElementById('consensusLat').textContent = unifiedResult.lat.toFixed(4);
+      document.getElementById('consensusLng').textContent = unifiedResult.lng.toFixed(4);
+      document.getElementById('consensusReason').textContent = unifiedResult.reason;
+      // Calculate metrics
+      const { confidence, precision, consistency } = calculateMetrics();
+      // Update metrics
+      document.getElementById('confidence').textContent = `${Math.round(confidence)}%`;
+      document.getElementById('precision').textContent = `±${precision.toFixed(1)} km`;
+      document.getElementById('consistency').textContent = `${Math.round(consistency)}%`;
+      // Update map
+      updateMap(unifiedResult.lat, unifiedResult.lng);
+      // Enable map buttons
+      streetViewBtn.disabled = false;
+      osmBtn.disabled = false;
+      // Update status
+      updateStatus(TOTAL_STEPS, 'Analysis complete! Unified result generated.');
+      // Mark all steps as completed
+      document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active');
+        step.classList.add('completed');
+      });
+      // Show success message
+      analyzeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Analysis Complete';
+      analyzeBtn.style.background = 'linear-gradient(to right, #10b981, #059669)';
+      analyzeBtn.disabled = false;
+    }
+    function updateMap(lat, lng) {
+      try {
+        const bbox = 0.01; // Tighter zoom level for better view
+        const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${
+          lng - bbox
+        }%2C${
+          lat - bbox
+        }%2C${
+          lng + bbox
+        }%2C${
+          lat + bbox
+        }&layer=mapnik&marker=${lat}%2C${lng}`;
+        consensusMap.src = mapUrl;
+      } catch (error) {
+        console.error('Failed to update map:', error);
+        // Fallback: show text coordinates if map fails
+        consensusMap.style.display = 'none';
+        const mapContainer = document.querySelector('.map-container');
+        mapContainer.innerHTML = `
+          <div style="padding: 20px; text-align: center; background: #f8fafc; border-radius: 10px;">
+            <i class="fas fa-map-marker-alt" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+            <p>Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+            <p style="color: var(--gray); font-size: 0.9rem;">Map unavailable - use the buttons below to view location</p>
+          </div>
+        `;
+      }
+    }
+    function calculateMetrics() {
+      // We need at least 2 results to calculate meaningful metrics
+      if (analysisResults.length < 2) {
+        return { confidence: 75, precision: 5.0, consistency: 70 };
+      }
+      // Calculate metrics based on the first 4 results (excluding unified)
+      const nonUnifiedResults = analysisResults.slice(0, -1);
+      if (nonUnifiedResults.length === 0) {
+        return { confidence: 75, precision: 5.0, consistency: 70 };
+      }
+      // Calculate average coordinates
+      const avgLat = nonUnifiedResults.reduce((sum, r) => sum + r.lat, 0) / nonUnifiedResults.length;
+      const avgLng = nonUnifiedResults.reduce((sum, r) => sum + r.lng, 0) / nonUnifiedResults.length;
+      // Calculate standard deviation (as a measure of precision)
+      let latVariance = 0;
+      let lngVariance = 0;
+      nonUnifiedResults.forEach(r => {
+        latVariance += Math.pow(r.lat - avgLat, 2);
+        lngVariance += Math.pow(r.lng - avgLng, 2);
+      });
+      const latStdDev = Math.sqrt(latVariance / nonUnifiedResults.length);
+      const lngStdDev = Math.sqrt(lngVariance / nonUnifiedResults.length);
+      // Convert to km (rough approximation)
+      const latKm = latStdDev * 111; // 1 degree latitude ≈ 111 km
+      const lngKm = lngStdDev * (111 * Math.cos(avgLat * Math.PI / 180)); // Longitude varies by latitude
+      // Calculate precision as average of both
+      const precision = Math.max(0.1, (latKm + lngKm) / 2);
+      // Consistency is inversely related to spread (100 = perfect agreement)
+      const maxSpread = 0.1; // Maximum expected spread in degrees
+      const spreadRatio = Math.min(1, Math.sqrt(latStdDev*latStdDev + lngStdDev*lngStdDev) / maxSpread);
+      const consistency = Math.max(60, Math.min(95, 95 - (spreadRatio * 35)));
+      // Confidence is based on consistency and number of analyses
+      const analysisBonus = Math.min(10, nonUnifiedResults.length * 2);
+      const confidence = Math.max(65, Math.min(92, consistency + analysisBonus - 5));
+      return {
+        confidence,
+        precision,
+        consistency
+      };
+    }
+    async function splitImage(imageData, section) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              throw new Error('Could not get canvas context');
+            }
+            // Set canvas dimensions based on section
+            let sx, sy, sWidth, sHeight;
+            switch(section) {
+              case 'top':
+                sx = 0;
+                sy = 0;
+                sWidth = img.width;
+                sHeight = Math.floor(img.height / 3);
+                break;
+              case 'mid':
+                sx = 0;
+                sy = Math.floor(img.height / 3);
+                sWidth = img.width;
+                sHeight = Math.floor(img.height / 3);
+                break;
+              case 'bot':
+                sx = 0;
+                sy = Math.floor((img.height / 3) * 2);
+                sWidth = img.width;
+                sHeight = Math.floor(img.height / 3);
+                break;
+              default:
+                sx = 0;
+                sy = 0;
+                sWidth = img.width;
+                sHeight = img.height;
+            }
+            canvas.width = sWidth;
+            canvas.height = sHeight;
+            // Draw the section of the image to the canvas
+            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
+            // Convert to base64
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            resolve(dataUrl);
+          } catch (error) {
+            reject(new Error(`Failed to process image section: ${error.message}`));
+          }
+        };
+        img.onerror = function() {
+          reject(new Error('Failed to load image for segmentation'));
+        };
+        // Handle both data URLs and regular URLs
+        if (imageData.startsWith('data:')) {
+          img.src = imageData;
+        } else {
+          // Set crossOrigin before setting src for external images
+          img.crossOrigin = 'anonymous';
+          img.src = imageData;
+        }
+      });
+    }
+    // Real AI API integration (commented out for demo)
+    /*
+    async function callAI(base64Image) {
+      try {
+        // Example using a different API endpoint
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer YOUR_API_KEY_HERE'
+          },
+          body: JSON.stringify({
+            model: "gpt-4-vision-preview",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Analyze this image and guess the geographic location. Respond in exactly this format:\nLatitude: [lat]\nLongitude: [lng]\nReason: [short explanation of why you think it's there, based on terrain, architecture, language, signs, vegetation, etc.]"
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: base64Image
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 500
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const aiResponse = data.choices?.[0]?.message?.content;
+        if (!aiResponse) {
+          throw new Error("No response from AI");
+        }
+        // Parse response
+        const latMatch = aiResponse.match(/Latitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const lngMatch = aiResponse.match(/Longitude:\s*([\-+]?\d+(\.\d+)?)/);
+        const reasonMatch = aiResponse.match(/Reason:(.*)/s);
+        const lat = latMatch ? parseFloat(latMatch[1]) : null;
+        const lng = lngMatch ? parseFloat(lngMatch[1]) : null;
+        const reason = reasonMatch ? reasonMatch[1].trim() : "No explanation provided.";
+        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+          throw new Error("Could not extract valid coordinates from AI response");
+        }
+        // Validate coordinate ranges
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          throw new Error("Invalid coordinate values from AI response");
+        }
+        return { lat, lng, reason };
+      } catch (error) {
+        console.error("AI call failed:", error);
+        throw error;
+      }
+    }
+    */
+  </script>
+
+
+
+<script defer="" data-domain="html.cafe" src="./GeoGuesser AI - Advanced Multi-Pass Analysis_files/script.js.download"></script>
+
+   </body></html>
