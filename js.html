@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download as .js file</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 400px; font-family: monospace; font-size: 14px; }
+        button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h2>Edit or paste your userscript code below</h2>
+    <textarea id="code">
+// ==UserScript==
+// @name         Auto Register & Verify
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Fill registration form with temp email, auto‑click verification link (iOS Userscripts compatible)
+// @author       You
+// @match        *://*/*
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_openInTab
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // ------------------- Configuration -------------------
+    const FIRST_NAMES = ["Axton","Brenner","Caelum","Daxton","Evren","Fintan","Garrick","Hollis","Ivar","Jorren","Kaelen","Lior","Marek","Niko","Orin","Paxton","Quill","Riven","Soren","Torin","Ulric","Vance","Wystan","Xavian","Yorick","Zephyr"];
+    const LAST_NAMES = ["Ashvale","Blackthorne","Crowhurst","Duskryn","Emberfall","Frostvale","Grimwood","Hallowmere","Ironvale","Jadecrest","Kingshade","Lockridge","Moonridge","Nightwell","Oakthorne","Pyrewell","Quarryn","Ravencrest","Stormvale","Thornridge","Umberfield","Valehart","Wildthorne","Xandermere","Yarrowfell","Zeravale"];
+    const PASSWORD = "coolaxiom121";
+    const TEMP_DOMAIN = "1secmail.com";  // can also use "mailto.plus" etc.
+    const CHECK_INTERVAL = 5000; // milliseconds between inbox checks
+    // -----------------------------------------------------
+
+    const randomString = (n) => Math.random().toString(36).substring(2, 2 + n);
+
+    // ---------- On registration page ----------
+    if (!window.location.hostname.includes('1secmail.com')) {
+        // Generate credentials
+        const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+        const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+        const username = (firstName + lastName + randomString(4)).toLowerCase();
+        const email = username + '@' + TEMP_DOMAIN;
+
+        // Fill form fields
+        document.querySelectorAll('input').forEach(input => {
+            const haystack = (input.name + input.id + input.placeholder + input.type).toLowerCase();
+            if (haystack.includes('first')) input.value = firstName;
+            else if (haystack.includes('last')) input.value = lastName;
+            else if (haystack.includes('user') || haystack.includes('login')) input.value = username;
+            else if (haystack.includes('mail') || haystack.includes('email')) input.value = email;
+            else if (haystack.includes('pass') && !haystack.includes('confirm')) input.value = PASSWORD;
+            else if (haystack.includes('confirm') || haystack.includes('repass') || haystack.includes('repeat')) input.value = PASSWORD;
+            // Trigger change events for frameworks
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        // Store email data for later use on inbox page
+        GM_setValue('temp_login', username);
+        GM_setValue('temp_domain', TEMP_DOMAIN);
+
+        // Open inbox in new tab
+        const inboxUrl = `https://www.1secmail.com/?login=${username}&domain=${TEMP_DOMAIN}`;
+        GM_openInTab(inboxUrl, { active: true });
+
+        alert(`Form filled with:\nEmail: ${email}\nPassword: ${PASSWORD}\n\nInbox opened. After submitting the form, the inbox page will automatically open the verification link.`);
+    }
+
+    // ---------- On 1secmail inbox page ----------
+    else {
+        const login = GM_getValue('temp_login');
+        const domain = GM_getValue('temp_domain');
+        if (!login || !domain) return; // no pending verification
+
+        // Function to check for new messages and extract link
+        async function checkInboxAndVerify() {
+            const apiUrl = `https://www.1secmail.com/api/v1/?action=getMessages&login=${login}&domain=${domain}`;
+            try {
+                const response = await fetch(apiUrl);
+                const messages = await response.json();
+                if (messages.length === 0) {
+                    console.log('No messages yet, retrying...');
+                    setTimeout(checkInboxAndVerify, CHECK_INTERVAL);
+                    return;
+                }
+
+                const msgId = messages[0].id;
+                const contentUrl = `https://www.1secmail.com/api/v1/?action=readMessage&login=${login}&domain=${domain}&id=${msgId}`;
+                const contentResp = await fetch(contentUrl);
+                const msgData = await contentResp.json();
+
+                const body = msgData.body || '';
+                // Simple link extraction – you can improve this if needed
+                const linkMatch = body.match(/https?:\/\/[^\s"']+/);
+                if (linkMatch) {
+                    const verifyLink = linkMatch[0];
+                    console.log('Found verification link:', verifyLink);
+                    GM_openInTab(verifyLink, { active: true });
+                    // Clear stored data
+                    GM_setValue('temp_login', '');
+                } else {
+                    console.log('No link found in email body');
+                    setTimeout(checkInboxAndVerify, CHECK_INTERVAL);
+                }
+            } catch (error) {
+                console.error('Error checking inbox:', error);
+                setTimeout(checkInboxAndVerify, CHECK_INTERVAL);
+            }
+        }
+
+        // Start checking after a short delay (to allow email delivery)
+        setTimeout(checkInboxAndVerify, 10000);
+    }
+})();
+    </textarea>
+    <br>
+    <button id="download">Download as .js file</button>
+
+    <script>
+        document.getElementById('download').addEventListener('click', function() {
+            const code = document.getElementById('code').value;
+            const blob = new Blob([code], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'userscript.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
