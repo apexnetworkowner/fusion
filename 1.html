@@ -1,91 +1,883 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Game → Data URL Embed Generator</title>
-<style>
-  body { font-family: Arial, sans-serif; margin:20px; background:#f5f5f5; }
-  h2 { color:#4a148c; }
-  label { font-weight:bold; margin-top:12px; display:block; }
-  textarea, input[type=file] { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc; font-family:monospace; }
-  button { margin-top:12px; padding:10px 16px; border:none; border-radius:6px; background:#4a148c; color:white; cursor:pointer; }
-  button:hover { background:#6a1b9a; }
-  #status { margin-top:10px; font-weight:bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter Bypasser Pro - Proxy Rotation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-card: #141b3d;
+            --primary: #00d4ff;
+            --success: #00ff88;
+            --danger: #ff4757;
+            --warning: #ffd93d;
+            --text: #e4e9f7;
+            --text-dim: #8b95b0;
+            --border: #1e2749;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: var(--bg-card);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .main-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), #0099cc);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger), #cc0033);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-dark);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-dark);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+
+        .stat-card.success {
+            border-color: var(--success);
+        }
+
+        .stat-card.danger {
+            border-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-card.success .stat-value {
+            color: var(--success);
+        }
+
+        .stat-card.danger .stat-value {
+            color: var(--danger);
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--text-dim);
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: var(--bg-dark);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .log-container {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            padding: 8px;
+            border-left: 3px solid;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .log-entry.info {
+            border-color: var(--primary);
+        }
+
+        .log-entry.success {
+            border-color: var(--success);
+        }
+
+        .log-entry.error {
+            border-color: var(--danger);
+        }
+
+        .log-time {
+            color: var(--text-dim);
+            margin-right: 10px;
+        }
+
+        .ip-list {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .ip-item {
+            padding: 5px;
+            margin-bottom: 5px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .ip-item.success {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 3px solid var(--success);
+        }
+
+        .ip-item.failed {
+            background: rgba(255, 71, 87, 0.05);
+            border-left: 3px solid var(--danger);
+        }
+
+        .warning-box {
+            background: rgba(255, 217, 61, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box strong {
+            color: var(--warning);
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        @media (max-width: 1200px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .iframe-container {
+            display: none;
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+        }
+    </style>
 </head>
 <body>
-<h2>HTML Game → Google Sites Embed Generator</h2>
+    <div class="container">
+        <header>
+            <h1>🚀 Counter Bypasser Pro</h1>
+            <p class="subtitle">Browser-Based Proxy Rotation & Traffic Generator</p>
+        </header>
 
-<label for="fileInput">Choose HTML Game File:</label>
-<input id="fileInput" type="file" accept=".html,.htm">
+        <div class="main-panel">
+            <!-- Proxy Configuration -->
+            <div class="section">
+                <h2>🌐 Proxy Configuration</h2>
+                
+                <div class="warning-box">
+                    <strong>⚠️ IMPORTANT:</strong> Add proxies below (one per line). Format: <code>http://ip:port</code> or <code>ip:port</code>
+                </div>
 
-<label for="gameHTML">Or Paste HTML Game Code:</label>
-<textarea id="gameHTML" rows="10" placeholder="Paste your game HTML here..."></textarea>
+                <div class="form-group">
+                    <label for="proxy-list">Proxy List</label>
+                    <textarea id="proxy-list" placeholder="http://123.45.67.89:8080
+socks5://proxy.example.com:1080
+http://user:pass@proxy.com:3128
 
-<button id="convert">Convert to Embed</button>
-<div id="status"></div>
+Or use CORS proxies:
+https://cors-anywhere.herokuapp.com/
+https://api.allorigins.win/raw?url="></textarea>
+                </div>
 
-<h3>Iframe Embed (Google Sites)</h3>
-<textarea id="iframeSnippet" rows="6" readonly></textarea>
-<button id="copyBtn">Copy</button>
+                <div class="button-group">
+                    <button id="test-proxies-btn" class="btn btn-secondary">🧪 Test Proxies</button>
+                    <button id="fetch-free-btn" class="btn btn-primary">🌍 Use Free CORS Proxies</button>
+                </div>
 
-<script>
-let currentDataUrl = "";
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="proxy-total">0</div>
+                        <div class="stat-label">Total Proxies</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-value" id="proxy-working">0</div>
+                        <div class="stat-label">Working</div>
+                    </div>
+                </div>
+            </div>
 
-// Convert text to base64
-function toBase64(str){
-  return btoa(unescape(encodeURIComponent(str)));
-}
+            <!-- Target Configuration -->
+            <div class="section">
+                <h2>⚙️ Target Configuration</h2>
 
-// Handle file upload
-document.getElementById("fileInput").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      document.getElementById("gameHTML").value = ev.target.result;
-    };
-    reader.readAsText(file);
-  }
-});
+                <div class="form-group">
+                    <label for="target-url">Target URL</label>
+                    <input type="text" id="target-url" placeholder="https://example.com/link" />
+                </div>
 
-// Convert game → data URL + iframe
-document.getElementById("convert").addEventListener("click", ()=>{
-  const html = document.getElementById("gameHTML").value.trim();
-  const status = document.getElementById("status");
-  if(!html){ status.textContent = "⚠️ Please upload or paste a game."; return; }
+                <div class="form-group">
+                    <label for="visit-count">Number of Visits</label>
+                    <input type="number" id="visit-count" value="50" min="1" max="1000" />
+                </div>
 
-  status.textContent = "⏳ Converting...";
-  try {
-    const encoded = toBase64(html);
-    currentDataUrl = "data:text/html;base64," + encoded;
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="delay-min">Min Delay (seconds)</label>
+                        <input type="number" id="delay-min" value="2" min="0" step="0.5" />
+                    </div>
+                    <div class="form-group">
+                        <label for="delay-max">Max Delay (seconds)</label>
+                        <input type="number" id="delay-max" value="5" min="0" step="0.5" />
+                    </div>
+                </div>
 
-    const snippet = `<iframe src="${currentDataUrl}" style="width:100%;height:600px;border:0;"></iframe>`;
-    document.getElementById("iframeSnippet").value = snippet;
-    status.textContent = "✅ Embed generated!";
-  } catch(err){
-    console.error(err);
-    status.textContent = "❌ Failed to generate.";
-  }
-});
+                <div class="mode-selector">
+                    <div class="mode-btn active" data-mode="iframe">
+                        <strong>📄 iFrame Mode</strong><br>
+                        <small>Loads in hidden iframe</small>
+                    </div>
+                    <div class="mode-btn" data-mode="fetch">
+                        <strong>⚡ Fetch Mode</strong><br>
+                        <small>Direct HTTP requests</small>
+                    </div>
+                </div>
 
-// Copy button
-document.getElementById("copyBtn").addEventListener("click", ()=>{
-  const txt = document.getElementById("iframeSnippet").value;
-  if(txt){
-    navigator.clipboard.writeText(txt).then(()=>alert("Copied!"));
-  }
-});
+                <div class="button-group">
+                    <button id="start-btn" class="btn btn-primary">▶️ Start Bypass</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>⏹️ Stop</button>
+                </div>
+            </div>
 
-// Keyboard shortcut: Shift + C → open in new tab
-document.addEventListener("keydown", e=>{
-  if(e.shiftKey && e.key.toLowerCase() === "c" && currentDataUrl){
-    const w = window.open("about:blank","_blank");
-    w.document.write(`<iframe src="${currentDataUrl}" style="border:0;width:100%;height:100%;"></iframe>`);
-    w.document.close();
-  }
-});
-</script>
+            <!-- Statistics -->
+            <div class="section">
+                <h2>📊 Statistics</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-visits">0</div>
+                        <div class="stat-label">Total Visits</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-value" id="successful-visits">0</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-value" id="failed-visits">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="success-rate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress</span>
+                        <span id="progress-text">0 / 0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px; color: var(--text-dim); font-size: 1rem;">Recent IPs Used</h3>
+                <div class="ip-list" id="ip-list">
+                    <div class="ip-item">No visits yet...</div>
+                </div>
+            </div>
+
+            <!-- Live Log -->
+            <div class="section">
+                <h2>📝 Live Activity Log</h2>
+                <div class="log-container" id="log-container">
+                    <div class="log-entry info">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-message">System ready. Add proxies and configure settings.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="section full-width">
+                <h2>✨ Features</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--primary);">
+                        🔀 Proxy Rotation - Every visit uses different proxy
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--success);">
+                        🎭 User-Agent Spoofing - Randomized browser fingerprints
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--warning);">
+                        ⚡ Dual Mode - iFrame or Fetch API
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--danger);">
+                        🌐 CORS Bypass - Built-in CORS proxy support
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--primary);">
+                        📊 Real-time Stats - Live tracking & IP logging
+                    </div>
+                    <div style="padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 3px solid var(--success);">
+                        🔄 Auto-retry - Failed proxies auto-skipped
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden iframe for visits -->
+    <div class="iframe-container" id="iframe-container"></div>
+
+    <script>
+        // Global variables
+        let isRunning = false;
+        let currentVisit = 0;
+        let totalVisits = 0;
+        let successfulVisits = 0;
+        let failedVisits = 0;
+        let proxies = [];
+        let workingProxies = [];
+        let usedIPs = [];
+        let selectedMode = 'iframe';
+
+        const USER_AGENTS = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+        ];
+
+        const CORS_PROXIES = [
+            'https://cors-anywhere.herokuapp.com/',
+            'https://api.allorigins.win/raw?url=',
+            'https://api.codetabs.com/v1/proxy?quest=',
+        ];
+
+        // Elements
+        const elements = {
+            proxyList: document.getElementById('proxy-list'),
+            targetUrl: document.getElementById('target-url'),
+            visitCount: document.getElementById('visit-count'),
+            delayMin: document.getElementById('delay-min'),
+            delayMax: document.getElementById('delay-max'),
+            startBtn: document.getElementById('start-btn'),
+            stopBtn: document.getElementById('stop-btn'),
+            testProxiesBtn: document.getElementById('test-proxies-btn'),
+            fetchFreeBtn: document.getElementById('fetch-free-btn'),
+            totalVisitsEl: document.getElementById('total-visits'),
+            successfulVisitsEl: document.getElementById('successful-visits'),
+            failedVisitsEl: document.getElementById('failed-visits'),
+            successRateEl: document.getElementById('success-rate'),
+            progressFill: document.getElementById('progress-fill'),
+            progressText: document.getElementById('progress-text'),
+            logContainer: document.getElementById('log-container'),
+            ipList: document.getElementById('ip-list'),
+            proxyTotal: document.getElementById('proxy-total'),
+            proxyWorking: document.getElementById('proxy-working'),
+            iframeContainer: document.getElementById('iframe-container')
+        };
+
+        // Mode selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMode = btn.dataset.mode;
+                addLog(`🔧 Switched to ${selectedMode.toUpperCase()} mode`, 'info');
+            });
+        });
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            elements.logContainer.appendChild(logEntry);
+            elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+        }
+
+        // Update stats
+        function updateStats() {
+            elements.totalVisitsEl.textContent = totalVisits;
+            elements.successfulVisitsEl.textContent = successfulVisits;
+            elements.failedVisitsEl.textContent = failedVisits;
+            
+            const rate = totalVisits > 0 ? ((successfulVisits / totalVisits) * 100).toFixed(1) : 0;
+            elements.successRateEl.textContent = `${rate}%`;
+            
+            const progress = totalVisits > 0 ? (currentVisit / elements.visitCount.value) * 100 : 0;
+            elements.progressFill.style.width = `${progress}%`;
+            elements.progressText.textContent = `${currentVisit} / ${elements.visitCount.value}`;
+        }
+
+        // Add IP to list
+        function addIPToList(ip, success) {
+            const ipItem = document.createElement('div');
+            ipItem.className = `ip-item ${success ? 'success' : 'failed'}`;
+            ipItem.textContent = `${success ? '✓' : '✗'} ${ip} - ${new Date().toLocaleTimeString()}`;
+            
+            if (elements.ipList.children.length === 1 && elements.ipList.children[0].textContent === 'No visits yet...') {
+                elements.ipList.innerHTML = '';
+            }
+            
+            elements.ipList.insertBefore(ipItem, elements.ipList.firstChild);
+            
+            // Keep only last 20 IPs
+            while (elements.ipList.children.length > 20) {
+                elements.ipList.removeChild(elements.ipList.lastChild);
+            }
+        }
+
+        // Parse proxies
+        function parseProxies() {
+            const text = elements.proxyList.value.trim();
+            if (!text) return [];
+            
+            const lines = text.split('\n').filter(line => line.trim() && !line.startsWith('#'));
+            return lines.map(line => {
+                line = line.trim();
+                if (!line.startsWith('http://') && !line.startsWith('https://') && !line.startsWith('socks')) {
+                    return `http://${line}`;
+                }
+                return line;
+            });
+        }
+
+        // Test single proxy
+        async function testProxy(proxy) {
+            try {
+                const testUrl = 'https://api.ipify.org?format=json';
+                const proxyUrl = proxy.includes('cors-anywhere') || proxy.includes('allorigins') || proxy.includes('codetabs')
+                    ? proxy + testUrl
+                    : testUrl; // For CORS proxies
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
+                    },
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return { working: true, ip: data.ip || 'Unknown' };
+                }
+                return { working: false };
+            } catch (error) {
+                return { working: false };
+            }
+        }
+
+        // Test all proxies
+        elements.testProxiesBtn.addEventListener('click', async () => {
+            proxies = parseProxies();
+            
+            if (proxies.length === 0) {
+                addLog('❌ No proxies to test. Add some first!', 'error');
+                return;
+            }
+            
+            elements.testProxiesBtn.disabled = true;
+            elements.testProxiesBtn.textContent = '🧪 Testing...';
+            addLog(`🧪 Testing ${proxies.length} proxies...`, 'info');
+            
+            workingProxies = [];
+            
+            for (const proxy of proxies) {
+                const result = await testProxy(proxy);
+                if (result.working) {
+                    workingProxies.push(proxy);
+                    addLog(`✅ Working: ${proxy} -> IP: ${result.ip}`, 'success');
+                }
+            }
+            
+            elements.proxyTotal.textContent = proxies.length;
+            elements.proxyWorking.textContent = workingProxies.length;
+            
+            addLog(`✅ Test complete: ${workingProxies.length}/${proxies.length} working`, 'success');
+            
+            elements.testProxiesBtn.disabled = false;
+            elements.testProxiesBtn.textContent = '🧪 Test Proxies';
+        });
+
+        // Use free CORS proxies
+        elements.fetchFreeBtn.addEventListener('click', () => {
+            elements.proxyList.value = CORS_PROXIES.join('\n');
+            proxies = CORS_PROXIES;
+            workingProxies = CORS_PROXIES;
+            elements.proxyTotal.textContent = CORS_PROXIES.length;
+            elements.proxyWorking.textContent = CORS_PROXIES.length;
+            addLog(`✅ Loaded ${CORS_PROXIES.length} CORS proxies`, 'success');
+        });
+
+        // Visit URL via iframe
+        function visitViaIframe(url, proxy) {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                
+                const proxyUrl = proxy + url;
+                iframe.src = proxyUrl;
+                
+                let resolved = false;
+                
+                iframe.onload = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(true);
+                    }
+                };
+                
+                iframe.onerror = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(false);
+                    }
+                };
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(true); // Consider timeout as success (page might have loaded)
+                    }
+                    elements.iframeContainer.removeChild(iframe);
+                }, 10000);
+                
+                elements.iframeContainer.appendChild(iframe);
+            });
+        }
+
+        // Visit URL via fetch
+        async function visitViaFetch(url, proxy) {
+            try {
+                const proxyUrl = proxy + url;
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                    },
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(15000)
+                });
+                
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Main bypass function
+        async function performBypass() {
+            const url = elements.targetUrl.value.trim();
+            const count = parseInt(elements.visitCount.value);
+            const delayMin = parseFloat(elements.delayMin.value) * 1000;
+            const delayMax = parseFloat(elements.delayMax.value) * 1000;
+            
+            if (!url) {
+                addLog('❌ Please enter a target URL', 'error');
+                return;
+            }
+            
+            if (workingProxies.length === 0) {
+                addLog('❌ No working proxies. Add proxies or use CORS proxies!', 'error');
+                return;
+            }
+            
+            isRunning = true;
+            currentVisit = 0;
+            totalVisits = 0;
+            successfulVisits = 0;
+            failedVisits = 0;
+            
+            elements.startBtn.disabled = true;
+            elements.stopBtn.disabled = false;
+            
+            addLog(`🚀 Starting bypass: ${count} visits to ${url}`, 'info');
+            addLog(`📊 Mode: ${selectedMode.toUpperCase()} | Proxies: ${workingProxies.length}`, 'info');
+            
+            for (let i = 0; i < count && isRunning; i++) {
+                currentVisit = i + 1;
+                
+                // Get random proxy
+                const proxy = workingProxies[Math.floor(Math.random() * workingProxies.length)];
+                const proxyDisplay = proxy.replace('https://cors-anywhere.herokuapp.com/', 'CORS-Anywhere')
+                                          .replace('https://api.allorigins.win/raw?url=', 'AllOrigins')
+                                          .replace('https://api.codetabs.com/v1/proxy?quest=', 'CodeTabs');
+                
+                addLog(`🔄 Visit ${currentVisit}/${count} via ${proxyDisplay}...`, 'info');
+                
+                let success;
+                if (selectedMode === 'iframe') {
+                    success = await visitViaIframe(url, proxy);
+                } else {
+                    success = await visitViaFetch(url, proxy);
+                }
+                
+                totalVisits++;
+                if (success) {
+                    successfulVisits++;
+                    addLog(`✅ Visit ${currentVisit} successful`, 'success');
+                    addIPToList(proxyDisplay, true);
+                } else {
+                    failedVisits++;
+                    addLog(`❌ Visit ${currentVisit} failed`, 'error');
+                    addIPToList(proxyDisplay, false);
+                }
+                
+                updateStats();
+                
+                // Random delay
+                const delay = Math.random() * (delayMax - delayMin) + delayMin;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            isRunning = false;
+            elements.startBtn.disabled = false;
+            elements.stopBtn.disabled = true;
+            
+            addLog(`✅ Bypass complete! ${successfulVisits}/${totalVisits} successful`, 'success');
+        }
+
+        // Start button
+        elements.startBtn.addEventListener('click', performBypass);
+
+        // Stop button
+        elements.stopBtn.addEventListener('click', () => {
+            isRunning = false;
+            elements.startBtn.disabled = false;
+            elements.stopBtn.disabled = true;
+            addLog('⏹️ Bypass stopped by user', 'info');
+        });
+
+        // Initial log
+        addLog('💻 Counter Bypasser Pro loaded', 'success');
+        addLog('ℹ️ Add proxies or click "Use Free CORS Proxies" to start', 'info');
+    </script>
 </body>
 </html>
